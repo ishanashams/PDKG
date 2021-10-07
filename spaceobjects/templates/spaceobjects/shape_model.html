@@ -1,0 +1,57 @@
+{% extends 'layout.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block title%}{{object.name}} Shape Model | Home{% endblock %}
+
+{% block scripts %}
+<script>
+window.SHAPE_PATH = "{% static shape_models.0.shape_path %}";
+</script>
+<script src="{% static "js/lib/three.r98.min.js" %}"></script>
+<script src="{% static "js/lib/TrackballControls.js" %}"></script>
+<script src="{% static "js/lib/OBJLoader.js" %}"></script>
+<script src="{% static "js/lib/spacekit.js" %}"></script>
+<script src="{% static "js/shape.js" %}"></script>
+{% endblock %}
+
+{% block header %}
+
+<header class="site-header">
+  <div class="container">
+    <div class="row">
+      <h4 class="mainheading">Planetary Defense Knowledge Gateway</h4>
+    </div>
+  </div>
+</header>
+<div class="row top-right-navbar">
+  <ul class="nav justify-content-center">
+      <li class="nav-item">
+          <a class="nav-link" href="/">Search</a>
+      </li>
+      
+      <li class="nav-item">
+          <a class="nav-link" href="/categorylist">Categories</a>
+      </li>
+  </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+<div>
+  <div class="breadcrumbs">
+    <a href="/">Home</a>
+    &raquo;
+    <a href="/category/{{object.orbit_class.slug}}">{{object.orbit_class.name}}s</a>
+    &raquo;
+    <a href="/asteroid/{{object.slug}}">{{object.name}}</a>
+    &raquo;
+    Shape Model
+  </div>
+  <div class="row">
+  <div class="col-sm-12">
+    <div id="shape-container"></div>
+  </div>
+  </div>
+</div>
+{% endblock %}

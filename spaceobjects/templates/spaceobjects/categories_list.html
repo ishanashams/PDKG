@@ -1,0 +1,90 @@
+{% extends 'layout.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block title%}Data-fused Asteroids and Comet Database | Close Approach, Potential Hazardous Objects, and Simulations{% endblock %}
+
+{% block scripts %}
+<script src="{% static "js/lib/three.r98.min.js" %}"></script>
+<script src="{% static "js/lib/TrackballControls.js" %}"></script>
+<script src="{% static "js/lib/spacekit.js" %}"></script>
+<!--
+<script src="http://localhost:8001/src/lib/three.r98.min.js"></script>
+<script src="http://localhost:8001/src/lib/TrackballControls.js"></script>
+<script src="http://localhost:8001/build/spacekit.js"></script>
+-->
+<script>
+window.OBJECT_DEFINITIONS= [
+{% for object_set in object_sets %}
+  {% for object in object_set.data %}
+{
+  name: unescape("{{object.name}}"),
+  slug: "{{object.slug}}",
+  ephem: {
+    a: {{object.a}},
+    e: {{object.e}},
+    i: {{object.i}},
+    om: {{object.om}},
+    w: {{object.w}},
+    ma: {{object.ma}},
+    epoch: {{object.epoch}}
+  }
+},
+  {% endfor %}
+{% endfor %}
+];
+
+</script>
+<script src="{% static "js/main.js" %}"></script>
+{% endblock %}
+
+{% block header %}
+<header class="site-header">
+  <div class="container">
+    <div class="row">
+      <h4 class="mainheading">Planetary Defense Knowledge Gateway</h4>
+    </div>
+  </div>
+</header>
+<div class="row top-right-navbar">
+  <ul class="nav justify-content-center">
+      <li class="nav-item">
+          <a class="nav-link" href="/">Search</a>
+      </li>
+      
+      <li class="nav-item">
+          <a class="nav-link" href="/categorylist">Categories</a>
+      </li>
+  </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container h-100">
+<div class="row d-flex justify-content-center">
+  <div class="mt-5 p-5">
+      <h2>Categories</h2>
+      <ul>
+        <li><a href="/category/asteroid-shapes">Asteroids with known shapes</a> - these asteroids have been mapped by light curve inversion, radar, or flybys.  Click through to see 3D models.</li>
+      </ul>
+
+      <p>
+        The categories below are orbital classifications as defined by <a href="https://pdssbn.astro.umd.edu/data_other/objclass.shtml">NASA PDS</a>:
+      </p>
+      <div class="row">
+      {% for orbit_class in orbit_classes %}
+        <div class="col-4 p-2 d-flex align-items-center" style="min-height: 200px">
+          <div class=" border rounded p-4 d-flex align-items-center h-100">
+              <div class="d-flex flex-column text-center" >
+                <h6><a href="/category/{{orbit_class.slug}}">{{orbit_class.name}}</a></h6>
+                <span>{{orbit_class.desc}}</span>
+              </div>
+          </div>
+        </div>
+        
+      {% endfor %}
+      </div>
+  </div>
+</div>
+</div>
+{% endblock %}

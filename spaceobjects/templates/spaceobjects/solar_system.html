@@ -1,0 +1,65 @@
+{% extends 'layout_fullscreen.html' %}
+{% load static %}
+
+{% block title%}Solar System | Home{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static "css/fullscreen.css" %}" />
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static "js/lib/three.r98.min.js" %}"></script>
+<script src="{% static "js/lib/TrackballControls.js" %}"></script>
+<script src="{% static "js/lib/spacekit.js" %}"></script>
+<!--
+<script src="http://localhost:8001/src/lib/three.r98.min.js"></script>
+<script src="http://localhost:8001/src/lib/TrackballControls.js"></script>
+<script src="http://localhost:8001/build/spacekit.js"></script>
+-->
+<script>
+window.OBJECT_DEFINITIONS = [
+];
+window.VIZ_SIMULATION_OPTS = {
+  {% verbatim %}
+  particleTextureUrl: '{{assets}}/sprites/fuzzyparticle.png',
+  {% endverbatim %}
+  particleDefaultSize: 20,
+  maxNumParticles: 1000000,
+  jdPerSecond: 0.1
+};
+window.VIZ_OBJECT_OPTS = {
+  particleSize: 20,
+  ecliptic: {
+    displayLines: true,
+  },
+};
+
+function selectOrbit(domElement) {
+  window.spaceobjects[domElement.dataset.slug].getOrbit().setHexColor(0xff0000);
+}
+function deselectOrbit(domElement) {
+  window.spaceobjects[domElement.dataset.slug].getOrbit().setHexColor(0xffffff);
+}
+</script>
+<script src="{% static "js/main.js" %}"></script>
+<script>
+init3dVis();
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="add-object-panel">
+  <h4>Add Objects</h4>
+  <div class="react-search-and-visualize"></div>
+</div>
+<div class="vis-panel">
+  <div class="vis-controls">
+    <a href="/"><button>&laquo; Main Site</button></a>
+    <button class="vis-controls__slower">Slower</button>
+    <button class="vis-controls__faster">Faster</button>
+    <button class="vis-controls__set-date">Set Date</button>
+    <span class="vis-status"></span>
+  </div>
+  <div id="orbit-sim" class="vis-container"></div>
+</div>
+{% endblock %}

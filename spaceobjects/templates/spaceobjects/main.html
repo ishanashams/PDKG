@@ -1,0 +1,118 @@
+{% extends 'layout.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block title%}Data-fused Asteroids and Comet Database | Close Approach, Potential Hazardous Objects, and Simulations{% endblock %}
+
+{% block scripts %}
+<script src="{% static "js/lib/three.r98.min.js" %}"></script>
+<script src="{% static "js/lib/TrackballControls.js" %}"></script>
+<script src="{% static "js/lib/spacekit.js" %}"></script>
+<!--
+<script src="http://localhost:8001/src/lib/three.r98.min.js"></script>
+<script src="http://localhost:8001/src/lib/TrackballControls.js"></script>
+<script src="http://localhost:8001/build/spacekit.js"></script>
+-->
+<script>
+window.OBJECT_DEFINITIONS= [
+{% for object_set in object_sets %}
+  {% for object in object_set.data %}
+{
+  name: unescape("{{object.name}}"),
+  slug: "{{object.slug}}",
+  ephem: {
+    a: {{object.a}},
+    e: {{object.e}},
+    i: {{object.i}},
+    om: {{object.om}},
+    w: {{object.w}},
+    ma: {{object.ma}},
+    epoch: {{object.epoch}}
+  }
+},
+  {% endfor %}
+{% endfor %}
+];
+
+window.VIZ_SIMULATION_OPTS = {
+  jdPerSecond: 2,
+};
+window.VIZ_OBJECT_OPTS = {
+  particleSize: 10,
+};
+
+function selectOrbit(domElement) {
+  Object.keys(window.spaceobjects).forEach(function(key) {
+    const ob = window.spaceobjects[key];
+    const obOrbit = ob.getOrbit();
+    if (key === domElement.dataset.slug) {
+      obOrbit.setVisibility(true);
+      obOrbit.setHexColor(0xff0000);
+      ob.setLabelVisibility(true);
+    } else {
+      obOrbit.setVisibility(false);
+      ob.setLabelVisibility(false);
+    }
+  });
+}
+function deselectOrbit(domElement) {
+  window.spaceobjects[domElement.dataset.slug].getOrbit().setHexColor(0xffffff);
+}
+</script>
+<script src="{% static "js/main.js" %}"></script>
+<script>
+init3dVis();
+Object.keys(window.spaceobjects).forEach(function(key) {
+  // TODO(ian): Until there is a better way to lazily create labels and orbits,
+  // we have to create them and then hide them...
+  const ob = window.spaceobjects[key];
+  ob.setLabelVisibility(false);
+  ob.getOrbit().setVisibility(false);
+});
+</script>
+{% endblock %}
+
+{% block header %}
+<header class="homepage">
+  <div class="container">
+    <div class="row">
+      <h1 class="mainheading">Planetary Defense Knowledge Gateway</h1>
+      <h5 class="subheading">Data-fused celestial objects database search engine - {{object_count|intcomma}} asteroids and comets</h5>
+    </div>
+    <div class="row">
+      <div class="item-container col-sm-12">
+          <div class="react-search"></div>
+          
+          <a class="btn btn-light mt-3" rel="nofollow" href="/asteroid/random" role="button">View a random object</a>
+      </div>
+    </div>
+  </div>
+</header>
+<div class="row top-right-navbar">
+  <ul class="nav justify-content-center">
+      <li class="nav-item">
+          <a class="nav-link" href="/">Search</a>
+      </li>
+      
+      <li class="nav-item">
+          <a class="nav-link" href="/categorylist">Categories</a>
+      </li>
+  </ul>
+</div>
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="row additional-information">
+  <div class="item-container col-sm-12 p-4">
+    <div class="item-container__inner">
+      <span>
+        This application compiles data from the NASA/JPL Small Body Database, the IAU Minor Planet Center, and the NASA/JPL Center for Near Earth Object Studies. If you'd like to create a customized solar system model, take a look at the full-screen interactive <a href="/solar-system">solar system</a> view.
+      </span>
+    </div>
+  </div>
+  
+</div>
+{% endblock %}

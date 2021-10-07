@@ -1,0 +1,46 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres:10.1-alpine
+    volumes:
+      - /var/spacedb/postgres/data:/var/lib/postgresql/data/
+    networks:
+      - db_network
+
+  app:
+    build: .
+    command: gunicorn --access-logfile - --error-logfile - --capture-output --log-level info -b '0.0.0.0:8000' -w 5 spacedb.wsgi
+    environment:
+      - DJANGO_SETTINGS_MODULE=spacedb.settings_prod
+    volumes:
+      - ./static:/app/static
+      - /var/spacedb/raw:/app/data/rawdata
+      - /var/spacedb/manual:/app/data/manual
+    ports:
+      - 8000:8000
+    networks:
+      - nginx_network
+      - db_network
+    depends_on:
+      - db
+
+  nginx:
+    image: nginx:1.13
+    volumes:
+      - ./config/nginx/conf.d:/etc/nginx/conf.d
+      - ./static:/var/www/static
+      - /var/spacedb/raw/shapes/archive:/var/www/static/data/shapefiles/damit
+      - /var/spacedb/manual/shapes:/var/www/static/data/shapefiles/manual
+    ports:
+      - 80:80
+    networks:
+      - nginx_network
+    depends_on:
+      - app
+
+networks:
+  nginx_network:
+    driver: bridge
+  db_network:
+    driver: bridge

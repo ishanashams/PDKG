@@ -1,0 +1,156 @@
+{% extends 'layout.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block title%}Data-fused Asteroids and Comet Database | Close Approach, Potential Hazardous Objects, and Simulations{% endblock %}
+
+{% block scripts %}
+<script src="{% static "js/lib/three.r98.min.js" %}"></script>
+<script src="{% static "js/lib/TrackballControls.js" %}"></script>
+<script src="{% static "js/lib/spacekit.js" %}"></script>
+<!--
+<script src="http://localhost:8001/src/lib/three.r98.min.js"></script>
+<script src="http://localhost:8001/src/lib/TrackballControls.js"></script>
+<script src="http://localhost:8001/build/spacekit.js"></script>
+-->
+<script>
+window.OBJECT_DEFINITIONS= [
+{% for object_set in object_sets %}
+  {% for object in object_set.data %}
+{
+  name: unescape("{{object.name}}"),
+  slug: "{{object.slug}}",
+  ephem: {
+    a: {{object.a}},
+    e: {{object.e}},
+    i: {{object.i}},
+    om: {{object.om}},
+    w: {{object.w}},
+    ma: {{object.ma}},
+    epoch: {{object.epoch}}
+  }
+},
+  {% endfor %}
+{% endfor %}
+];
+
+window.VIZ_SIMULATION_OPTS = {
+  jdPerSecond: 2,
+};
+window.VIZ_OBJECT_OPTS = {
+  particleSize: 10,
+};
+
+function selectOrbit(domElement) {
+  Object.keys(window.spaceobjects).forEach(function(key) {
+    const ob = window.spaceobjects[key];
+    const obOrbit = ob.getOrbit();
+    if (key === domElement.dataset.slug) {
+      obOrbit.setVisibility(true);
+      obOrbit.setHexColor(0xff0000);
+      ob.setLabelVisibility(true);
+    } else {
+      obOrbit.setVisibility(false);
+      ob.setLabelVisibility(false);
+    }
+  });
+}
+function deselectOrbit(domElement) {
+  window.spaceobjects[domElement.dataset.slug].getOrbit().setHexColor(0xffffff);
+}
+</script>
+<script src="{% static "js/main.js" %}"></script>
+<script>
+init3dVis();
+Object.keys(window.spaceobjects).forEach(function(key) {
+  const ob = window.spaceobjects[key];
+  ob.setLabelVisibility(false);
+  ob.getOrbit().setVisibility(false);
+});
+</script>
+{% endblock %}
+
+{% block header %}
+<header class="site-header">
+  <div class="container">
+    <div class="row">
+      <h4 class="mainheading">Planetary Defense Knowledge Gateway</h4>
+    </div>
+  </div>
+</header>
+<div class="row top-right-navbar">
+  <ul class="nav justify-content-center">
+      <li class="nav-item">
+          <a class="nav-link" href="/">Search</a>
+      </li>
+      
+      <li class="nav-item">
+          <a class="nav-link" href="/categorylist">Categories</a>
+      </li>
+  </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<div class="row d-flex justify-content-center">
+  <div class="item-container mt-5 pt-2">
+      <h2>Asteroids and Comets</h2>
+      <p>
+        We've organized hundreds of thousands celestial objects into these categories below for your perusal.
+      </p>
+      <div class="sticky vis-container vis-container__home"></div>
+      <p>
+        Mouseover objects in the lists below to highlight them in the orbit view. Click or tap to learn more about each object.
+      </p>
+      {% for object_set in object_sets %}
+        <div class="vis-selector" data-showvis="{{object_set.name}}">
+          <h3>{{object_set.name}}</h3>
+          <p>
+            {{object_set.description}} <!--<a href="/solar-system#cat={{object_set.category}}">See all</a>-->
+          </p>
+          <div class="carousel-flex-container">
+            <div class="carousel-flex-inner">
+            {% for object in object_set.data %}
+              <div class="tile carousel-item" data-slug="{{object.slug}}" onmouseover="if (typeof selectOrbit !== 'undefined') selectOrbit(this)"
+                onmouseout="if (typeof deselectOrbit !== 'undefined') deselectOrbit(this)">
+                <a href="{{object.get_absolute_url}}">
+                  <div>
+                    <h5>{{object.name}}</h5>
+                    <div class="tile-content">
+                      <span class="label label-default">{{object.size_adjective|title}}</span>
+                      {% if object.is_nea %}
+                        <span class="label label-info">Near-Earth</span>
+                      {% endif %}
+                      {% if object.ordered_close_approaches|length %}
+                        <span class="label label-warning">Close Approach</span>
+                      {% endif %}
+                      {% if object.is_pha %}
+                        <span class="label label-danger">Potentially Hazardous</span>
+                      {% endif %}
+                      <br>
+                      <div class="tile-desc">
+                        {{object.shorthand}} orbits the sun every {{object.period_in_years|floatformat:2|intcomma}} years and is about {{object.get_diameter_estimate|floatformat:3}} km in diameter, comparable in size to {{object.get_diameter_comparison}}.
+                        {% if object.ordered_sentry_events|length and not object_set.hide_impact_probability %}
+                          {% with object.ordered_sentry_events.0 as event %}
+                            <em>It will pass within {{event.dist_km|floatformat:0|intcomma}} km of Earth with an impact probability of {{event.prob_percentage}}% in {{event.date | date:"Y"}}.</em>
+                          {% endwith %}
+                        {% elif object.ordered_close_approaches|length %}
+                          {% with object.ordered_close_approaches.0 as event %}
+                            <em>It will pass by Earth on {{event.date | date}}.</em>
+                          {% endwith %}
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            {% endfor %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+  </div> <!-- end item-container -->
+</div> <!-- end row -->
+
+{% endblock %}
