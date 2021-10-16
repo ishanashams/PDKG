@@ -19,7 +19,10 @@ COPY static static
 COPY templates templates
 COPY data data
 COPY manage.py manage.py
+COPY scripts scripts
 
 EXPOSE 8000
+
+docker-compose run --rm app /bin/sh -c "cd /app && ./manage.py migrate && ./manage.py loaddata orbit_class"
 
 CMD python /app/manage.py runserver 0.0.0.0:8000
