@@ -1,5 +1,4 @@
-# spacedb
-
+# Planetary Defense Knowledge Gateway Starterkit
 To get started:
 
 ```
