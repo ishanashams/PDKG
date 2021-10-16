@@ -2,8 +2,8 @@
   "name": "spacedb",
   "version": "0.0.1",
   "main": "client/index.js",
-  "repository": "git@github.com:judymou/spacedb.git",
-  "author": "Ian and Judy",
+  "repository": "git@github.com:ishanashams/PDKG.git",
+  "author": "Ishan Shams",
   "license": "N/A",
   "scripts": {
     "build": "webpack",
